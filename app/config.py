@@ -37,6 +37,8 @@ class Config:
     SELF_BASE_URL = os.environ.get("SELF_BASE_URL", "")
     # 机器人每次审核的等待时间（毫秒），给页面脚本留出执行时间
     BOT_REVIEW_DELAY_MS = int(os.environ.get("BOT_REVIEW_DELAY_MS", "1500"))
+    # 浏览器可执行文件路径；留空则用 Playwright 自带的 Chromium
+    BROWSER_PATH = os.environ.get("BROWSER_PATH", "")
 
     # 匿名身份 Cookie
     USER_COOKIE_NAME = "flavalon_uid"

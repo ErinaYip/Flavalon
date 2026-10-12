@@ -15,10 +15,14 @@ def create_app(config_object=Config) -> Flask:
 
     db.init_app(app)
 
+    from . import bot
     from .routes import admin, api, pages
 
     app.register_blueprint(pages.bp)
     app.register_blueprint(api.bp)
     app.register_blueprint(admin.bp)
+
+    # 后台审核机器人：轮询 pending 日程并代为复核发布。
+    bot.init_app(app)
 
     return app
