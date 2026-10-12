@@ -83,6 +83,35 @@ def note_dates():
 
 
 # --------------------------------------------------------------------------- #
+# 日程投稿
+# --------------------------------------------------------------------------- #
+@bp.get("/agenda")
+@require_user
+def my_agenda():
+    return jsonify(store.list_agenda_mine(_user_id()))
+
+
+@bp.get("/agenda/published")
+def published_agenda():
+    return jsonify(store.list_agenda_published())
+
+
+@bp.post("/agenda")
+@require_user
+def submit_agenda():
+    data = request.get_json(silent=True) or {}
+    title = str(data.get("title", "")).strip()
+    content = str(data.get("content", "")).strip()
+    if not title or not content:
+        return jsonify({"error": "title and content are required"}), 400
+    if len(title) > 200 or len(content) > 5000:
+        return jsonify({"error": "too long"}), 400
+
+    item = store.create_agenda(_user_id(), title, content)
+    return jsonify(item), 201
+
+
+# --------------------------------------------------------------------------- #
 # 导出 / 导入
 # --------------------------------------------------------------------------- #
 @bp.get("/export")

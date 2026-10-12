@@ -88,6 +88,60 @@ def save_note(user_id: int, day: str, content: str) -> None:
 
 
 # --------------------------------------------------------------------------- #
+# 日程（每日事项投稿）
+# --------------------------------------------------------------------------- #
+def create_agenda(user_id: int, title: str, content: str) -> dict:
+    db = get_db()
+    cur = db.execute(
+        "INSERT INTO agenda (user_id, title, content, status, created_at) "
+        "VALUES (?, ?, ?, 'pending', ?)",
+        (user_id, title, content, _now()),
+    )
+    db.commit()
+    return dict(db.execute("SELECT * FROM agenda WHERE id = ?", (cur.lastrowid,)).fetchone())
+
+
+def list_agenda_mine(user_id: int) -> list[dict]:
+    rows = get_db().execute(
+        "SELECT id, title, content, status, created_at, reviewed_at, review_note "
+        "FROM agenda WHERE user_id = ? ORDER BY id DESC",
+        (user_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def list_agenda_published() -> list[dict]:
+    rows = get_db().execute(
+        "SELECT id, title, content, reviewed_at FROM agenda "
+        "WHERE status = 'approved' ORDER BY id DESC",
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def list_agenda_pending() -> list[dict]:
+    rows = get_db().execute(
+        "SELECT a.id, a.title, a.content, a.created_at, u.token AS user_token "
+        "FROM agenda a JOIN users u ON u.id = a.user_id "
+        "WHERE a.status = 'pending' ORDER BY a.id ASC",
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_agenda(agenda_id: int) -> dict | None:
+    row = get_db().execute("SELECT * FROM agenda WHERE id = ?", (agenda_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def review_agenda(agenda_id: int, approved: bool, note: str = "") -> None:
+    db = get_db()
+    db.execute(
+        "UPDATE agenda SET status = ?, reviewed_at = ?, review_note = ? WHERE id = ?",
+        ("approved" if approved else "rejected", _now(), note, agenda_id),
+    )
+    db.commit()
+
+
+# --------------------------------------------------------------------------- #
 # 导出 / 导入
 # --------------------------------------------------------------------------- #
 def export_user_data(user_id: int) -> dict:
@@ -106,11 +160,19 @@ def export_user_data(user_id: int) -> dict:
             "SELECT date, content FROM notes WHERE user_id = ?", (user_id,)
         ).fetchall()
     }
+    agenda = [
+        dict(r)
+        for r in db.execute(
+            "SELECT title, content, status, created_at FROM agenda WHERE user_id = ? ORDER BY id",
+            (user_id,),
+        ).fetchall()
+    ]
     return {
-        "version": 1,
+        "version": 2,
         "exported_at": _now(),
         "todos": todos,
         "notes": notes,
+        "agenda": agenda,
     }
 
 
@@ -118,6 +180,7 @@ def import_user_data(user_id: int, data: dict) -> None:
     db = get_db()
     db.execute("DELETE FROM todos WHERE user_id = ?", (user_id,))
     db.execute("DELETE FROM notes WHERE user_id = ?", (user_id,))
+    db.execute("DELETE FROM agenda WHERE user_id = ?", (user_id,))
 
     for todo in data.get("todos", []):
         db.execute(
@@ -139,4 +202,16 @@ def import_user_data(user_id: int, data: dict) -> None:
                 (user_id, str(day), str(content), _now()),
             )
 
+    for item in data.get("agenda", []):
+        db.execute(
+            "INSERT INTO agenda (user_id, title, content, status, created_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (
+                user_id,
+                str(item.get("title", "")),
+                str(item.get("content", "")),
+                "pending",
+                str(item.get("createdAt") or item.get("created_at") or _now()),
+            ),
+        )
     db.commit()

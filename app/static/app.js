@@ -434,6 +434,86 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // === 5. 每日事项（提交 -> 机器人审核 -> 发布）===
+    const agendaTitle = document.getElementById('agenda-title');
+    const agendaContent = document.getElementById('agenda-content');
+    const submitAgendaBtn = document.getElementById('submit-agenda-btn');
+    const agendaListEl = document.getElementById('agenda-list');
+    const publishedToggleBtn = document.getElementById('toggle-agenda-published-btn');
+    const publishedEl = document.getElementById('agenda-published');
+    const publishedListEl = document.getElementById('agenda-published-list');
+
+    const STATUS_LABEL = { pending: '审核中', approved: '已发布', rejected: '已驳回' };
+
+    async function loadMyAgenda() {
+        let items = [];
+        try {
+            items = await api('/api/agenda');
+        } catch (e) {
+            items = [];
+        }
+        agendaListEl.innerHTML = '';
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'agenda-item';
+            const title = document.createElement('strong');
+            title.textContent = item.title;
+            const status = document.createElement('span');
+            status.className = `agenda-status agenda-status-${item.status}`;
+            status.textContent = STATUS_LABEL[item.status] || item.status;
+            li.appendChild(title);
+            li.appendChild(status);
+            agendaListEl.appendChild(li);
+        });
+    }
+
+    submitAgendaBtn.addEventListener('click', async () => {
+        const title = agendaTitle.value.trim();
+        const content = agendaContent.value.trim();
+        if (!title || !content) {
+            alert('请填写日程标题和详情。');
+            return;
+        }
+        try {
+            await api('/api/agenda', { method: 'POST', body: { title, content } });
+            agendaTitle.value = '';
+            agendaContent.value = '';
+            await loadMyAgenda();
+            alert('已提交，等待后台机器人复核。');
+        } catch (e) {
+            alert('提交失败，请稍后重试。');
+        }
+    });
+
+    publishedToggleBtn.addEventListener('click', async () => {
+        const showing = publishedEl.style.display !== 'none';
+        if (showing) {
+            publishedEl.style.display = 'none';
+            publishedToggleBtn.textContent = '查看已发布';
+            return;
+        }
+        let items = [];
+        try {
+            items = await api('/api/agenda/published');
+        } catch (e) {
+            items = [];
+        }
+        publishedListEl.innerHTML = '';
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'agenda-published-item';
+            const h4 = document.createElement('h4');
+            h4.textContent = item.title;
+            const p = document.createElement('p');
+            p.textContent = item.content;
+            div.appendChild(h4);
+            div.appendChild(p);
+            publishedListEl.appendChild(div);
+        });
+        publishedEl.style.display = 'block';
+        publishedToggleBtn.textContent = '收起已发布';
+    });
+
     // === 6. 数据管理（导出 / 导入）===
     function downloadFile(filename, content, type) {
         const blob = new Blob([content], { type });
@@ -528,5 +608,6 @@ document.addEventListener('DOMContentLoaded', () => {
         await refreshNoteDates();
         renderCalendar();
         await loadNotesForSelectedDate();
+        await loadMyAgenda();
     })();
 });

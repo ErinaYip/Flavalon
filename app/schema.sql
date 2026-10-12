@@ -31,6 +31,21 @@ CREATE TABLE IF NOT EXISTS notes (
 
 CREATE INDEX IF NOT EXISTS idx_notes_user ON notes(user_id);
 
+-- 每日日程投稿：先进入 pending，由后台审核机器人复核后再发布。
+CREATE TABLE IF NOT EXISTS agenda (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title       TEXT    NOT NULL,
+    content     TEXT    NOT NULL,
+    status      TEXT    NOT NULL DEFAULT 'pending',  -- pending / approved / rejected
+    created_at  TEXT    NOT NULL,
+    reviewed_at TEXT,
+    review_note TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_agenda_status ON agenda(status);
+CREATE INDEX IF NOT EXISTS idx_agenda_user ON agenda(user_id);
+
 CREATE TABLE IF NOT EXISTS admins (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     username      TEXT    NOT NULL UNIQUE,

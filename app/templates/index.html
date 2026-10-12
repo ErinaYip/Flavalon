@@ -113,6 +113,25 @@
             </div>
         </main>
 
+        <!-- 每日事项：提交后需经后台机器人审核再发布 -->
+        <section class="agenda-section card">
+            <div class="notes-header-flex">
+                <h2>🗓️ 每日事项</h2>
+                <button id="toggle-agenda-published-btn" class="icon-btn">查看已发布</button>
+            </div>
+            <p class="notes-hint">提交的日程会先由后台机器人代为复核，通过后对外发布。</p>
+            <div class="agenda-input-group">
+                <input type="text" id="agenda-title" placeholder="日程标题...">
+                <textarea id="agenda-content" placeholder="日程详情（支持 Markdown）..."></textarea>
+                <button id="submit-agenda-btn">提交审核</button>
+            </div>
+            <div id="agenda-published" class="agenda-published" style="display: none;">
+                <h3>已发布日程</h3>
+                <div id="agenda-published-list"></div>
+            </div>
+            <h3>我的提交</h3>
+            <ul id="agenda-list" class="agenda-list"></ul>
+        </section>
     </div>
 
     <script src="{{ url_for('static', filename='app.js') }}"></script>
