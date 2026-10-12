@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flavalon - A place for peace.</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- 本地引入 marked.js 解析 Markdown -->
-    <script src="marked.min.js"></script>
+    <script src="{{ url_for('static', filename='marked.min.js') }}"></script>
 </head>
 <body>
     <div class="container">
@@ -70,7 +70,7 @@
                             <span id="tab-import" class="data-tab">导入</span>
                         </div>
                     </div>
-                    
+
                     <div id="export-panel" class="data-btn-group">
                         <button id="export-json-btn" class="export-btn" title="包含所有配置、待办和日记">📦 导出完整备份 (JSON)</button>
                         <button id="export-all-md-btn" class="export-btn" title="将所有日记合并为一个Markdown文件">📚 导出所有小记 (MD)</button>
@@ -112,8 +112,9 @@
                 </section>
             </div>
         </main>
+
     </div>
 
-    <script src="app.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
