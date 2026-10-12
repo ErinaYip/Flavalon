@@ -15,9 +15,10 @@ def create_app(config_object=Config) -> Flask:
 
     db.init_app(app)
 
-    from .routes import api, pages
+    from .routes import admin, api, pages
 
     app.register_blueprint(pages.bp)
     app.register_blueprint(api.bp)
+    app.register_blueprint(admin.bp)
 
     return app

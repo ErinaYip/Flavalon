@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flavalon 后台 · 复核 #{{ item.id }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header card">
+            <div class="title-section">
+                <h1 class="app-title">Flavalon</h1>
+                <p class="app-subtitle">日程复核 #{{ item.id }}</p>
+            </div>
+            <div class="weather-section">
+                <a class="icon-btn" href="{{ url_for('admin.dashboard') }}">返回队列</a>
+            </div>
+        </header>
+
+        <section class="card">
+            <h2>{{ item.title }}</h2>
+            <p class="agenda-meta">提交于 {{ item.created_at }}</p>
+            <!--
+                复核正文。安全版本按纯文本展示投稿内容，
+                Jinja 自动转义保证不会执行投稿者提供的任何标记。
+            -->
+            <div class="agenda-review-body">{{ item.content }}</div>
+
+            <form method="post" action="{{ url_for('admin.review', agenda_id=item.id) }}">
+                <input type="hidden" name="action" value="approve">
+                <button type="submit">通过并发布</button>
+            </form>
+            <form method="post" action="{{ url_for('admin.review', agenda_id=item.id) }}">
+                <input type="hidden" name="action" value="reject">
+                <button type="submit" class="danger-btn">驳回</button>
+            </form>
+        </section>
+    </div>
+</body>
+</html>

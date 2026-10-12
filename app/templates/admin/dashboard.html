@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flavalon 后台 · 审核队列</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header card">
+            <div class="title-section">
+                <h1 class="app-title">Flavalon</h1>
+                <p class="app-subtitle">审核队列 · {{ username }}</p>
+            </div>
+            <div class="weather-section">
+                <a class="icon-btn" href="{{ url_for('admin.site_key') }}">系统密钥</a>
+                <a class="icon-btn" href="{{ url_for('admin.logout') }}">退出</a>
+            </div>
+        </header>
+
+        <section class="card">
+            <h2>待审核日程（{{ pending|length }}）</h2>
+            {% if pending %}
+            <ul class="agenda-list">
+                {% for item in pending %}
+                <li class="agenda-item">
+                    <a href="{{ url_for('admin.queue_detail', agenda_id=item.id) }}">
+                        <strong>{{ item.title }}</strong>
+                    </a>
+                    <span class="agenda-meta">#{{ item.id }} · {{ item.created_at }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="notes-hint">暂无待审核内容。</p>
+            {% endif %}
+        </section>
+    </div>
+</body>
+</html>

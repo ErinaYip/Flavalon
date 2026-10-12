@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flavalon 后台 · 登录</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header card">
+            <div class="title-section">
+                <h1 class="app-title">Flavalon</h1>
+                <p class="app-subtitle">审核后台</p>
+            </div>
+        </header>
+        <section class="card admin-login-card">
+            <h2>管理员登录</h2>
+            {% if error %}<p class="form-error">{{ error }}</p>{% endif %}
+            <form method="post" action="{{ url_for('admin.login') }}">
+                {% if request.args.get('next') %}
+                <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+                {% endif %}
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" autocomplete="username" required>
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
+                <button type="submit">登录</button>
+            </form>
+        </section>
+    </div>
+</body>
+</html>
