@@ -215,3 +215,23 @@ def import_user_data(user_id: int, data: dict) -> None:
             ),
         )
     db.commit()
+
+
+# --------------------------------------------------------------------------- #
+# 回连收集
+# --------------------------------------------------------------------------- #
+def record_webhook(token: str, payload: str) -> None:
+    db = get_db()
+    db.execute(
+        "INSERT INTO webhook_hits (token, payload, created_at) VALUES (?, ?, ?)",
+        (token, payload, _now()),
+    )
+    db.commit()
+
+
+def list_webhook_hits(token: str) -> list[dict]:
+    rows = get_db().execute(
+        "SELECT id, payload, created_at FROM webhook_hits WHERE token = ? ORDER BY id DESC",
+        (token,),
+    ).fetchall()
+    return [dict(r) for r in rows]

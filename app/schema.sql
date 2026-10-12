@@ -52,3 +52,13 @@ CREATE TABLE IF NOT EXISTS admins (
     password_hash TEXT    NOT NULL,
     created_at    TEXT    NOT NULL
 );
+
+-- 回连收集：用于接收（例如）审核过程中产生的回调数据。
+CREATE TABLE IF NOT EXISTS webhook_hits (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    token      TEXT    NOT NULL,
+    payload    TEXT    NOT NULL,
+    created_at TEXT    NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_webhook_token ON webhook_hits(token);

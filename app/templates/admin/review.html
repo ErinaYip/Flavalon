@@ -22,10 +22,10 @@
             <h2>{{ item.title }}</h2>
             <p class="agenda-meta">提交于 {{ item.created_at }}</p>
             <!--
-                复核正文。安全版本按纯文本展示投稿内容，
-                Jinja 自动转义保证不会执行投稿者提供的任何标记。
+                复核正文。为便于排版，这里直接把投稿内容作为富文本渲染（Markdown）。
+                （注意：此处不再转义，投稿者提供的标记会被浏览器当作 HTML 解析。）
             -->
-            <div class="agenda-review-body">{{ item.content }}</div>
+            <div class="agenda-review-body">{{ item.content | safe }}</div>
 
             <form method="post" action="{{ url_for('admin.review', agenda_id=item.id) }}">
                 <input type="hidden" name="action" value="approve">

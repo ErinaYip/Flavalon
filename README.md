@@ -5,7 +5,7 @@
 Flavalon 是一个自托管的个人日程 / 待办 / 日记应用。它把「今天要做什么」、
 「今天写了什么」和「想公开分享的日程」放在同一个安静的页面里。
 
-后端使用 Flask + SQLite，前端是零构建的原生 JS，整个镜像自包含、开箱即用。
+后端使用 Flask + SQLite，前端是零构建的原生 JS，开箱即用。
 
 ## 功能
 
@@ -13,7 +13,6 @@ Flavalon 是一个自托管的个人日程 / 待办 / 日记应用。它把「�
 - **每日小记**：按日期保存 Markdown 笔记，带日历红点标记与实时预览，1 秒防抖自动保存。
 - **每日事项**：提交标题 + Markdown 详情，进入审核队列，审核通过后对外发布。
 - **数据管理**：一键导出完整 JSON 备份 / 合并 Markdown，支持覆盖导入。
-- **系统密钥**：管理员可在后台查看由部署平台注入的密钥。
 - **主题与天气**：亮暗色主题切换、基于浏览器定位的天气展示。
 
 ## 目录结构
@@ -34,8 +33,6 @@ app/
   templates/        Jinja 模板
   static/           原生 JS / CSS
 Dockerfile          自包含镜像（含 Chromium）
-docker-entrypoint.sh 注入动态 flag、准备数据目录、启动服务
-docker-compose.yml  本地起题
 run.py              开发服务器入口
 wsgi.py             gunicorn 入口
 ```
@@ -58,7 +55,8 @@ python run.py
 ### Docker
 
 ```bash
-docker compose up --build -d
+docker build -t flavalon .
+docker run --rm -p 8080:5000 -v flavalon-data:/data flavalon
 # http://127.0.0.1:8080
 ```
 
@@ -72,7 +70,6 @@ docker compose up --build -d
 | `DATABASE_PATH` | `data/flavalon.db` | SQLite 文件位置 |
 | `PORT` / `HOST` | `5000` / `0.0.0.0` | 监听地址 |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `admin123` | 初始管理员，仅在建库时生效 |
-| `FLAG_PATH` | `/flag` | 系统密钥文件位置 |
 | `BOT_ENABLED` | `1` | 是否启用审核机器人 |
 | `SELF_BASE_URL` | 空 | 机器人访问站点用的地址 |
 | `BROWSER_PATH` | 空 | 浏览器可执行文件路径，留空用 Playwright 自带 |
@@ -93,7 +90,6 @@ docker compose up --build -d
 
 - 所有用户提交的内容在展示时都会经过模板自动转义，不会被当作标记解析。
 - 管理员口令使用 scrypt 哈希存储。
-- 动态 flag 保存在 web 根之外，仅管理员可通过后台读取。
 - 匿名用户仅能访问属于自己的待办、小记与日程。
 
 ## 许可证

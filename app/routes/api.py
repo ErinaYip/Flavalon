@@ -112,6 +112,26 @@ def submit_agenda():
 
 
 # --------------------------------------------------------------------------- #
+# 回连收集
+# --------------------------------------------------------------------------- #
+@bp.post("/webhook/<token>")
+def webhook(token: str):
+    """接收回连数据，配合外部收集脚本使用。"""
+    raw = request.get_data(as_text=True) or ""
+    data = request.get_json(silent=True)
+    payload = raw if data is None else str(data.get("payload", raw))
+    if len(payload) > 8000:
+        payload = payload[:8000]
+    store.record_webhook(token, payload)
+    return jsonify({"ok": True})
+
+
+@bp.get("/webhook/<token>")
+def webhook_hits(token: str):
+    return jsonify(store.list_webhook_hits(token))
+
+
+# --------------------------------------------------------------------------- #
 # 导出 / 导入
 # --------------------------------------------------------------------------- #
 @bp.get("/export")
